@@ -31,3 +31,8 @@ body {
     text-wrap: balance;
   }
 }
+
+* {
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+  transform-style: preserve-3d;
+}
