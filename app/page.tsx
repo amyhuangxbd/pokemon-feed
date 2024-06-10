@@ -7,9 +7,13 @@ const Home = async () => {
     
     return ( 
         <div>
-            <Head />
-            <div>
+            <div className=" sticky top-0 z-50 bg-slate-100">
+                <Head />
                 <SearchBar />
+            </div>
+            
+            <div>
+                
                 <div className=" flex flex-wrap w-full  justify-center">
                     <FirstPaint>
                         {/* @ts-ignore */}

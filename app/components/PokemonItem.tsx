@@ -1,3 +1,5 @@
+import React, {memo} from 'react';
+
 interface IProps {
     pokemon: Record<string, any>
 }
@@ -5,8 +7,8 @@ interface IProps {
 const PokemonItem = (props: IProps) => {
     const { pokemon } = props;
     return ( 
-        <div className=" xl:w-1/5 w-1/4 mt-0 ml-4 mb-8 rounded-lg flex flex-col justify-center bg-orange-300">
-            <img src={pokemon?.image} alt={pokemon?.name} />
+        <div className=" xl:w-1/5 w-1/4 mt-0 ml-4 mb-8 rounded-lg flex flex-col justify-center" style={{ backgroundColor: 'transparent' }}>
+            <img src={pokemon?.image} alt={pokemon?.name} crossOrigin="anonymous" />
             <h3 className=" text-center font-bold">{pokemon?.name}</h3>
             <ul className=" p-3">
                 {pokemon?.stats?.map((stat: Record<string, any>) => (
@@ -17,4 +19,4 @@ const PokemonItem = (props: IProps) => {
      );
 };
 
-export default PokemonItem;
+export default memo(PokemonItem);

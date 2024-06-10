@@ -92,8 +92,8 @@ const SearchBar = () => {
     setCurrentPage(1)
   }
   return (
-    <div className='z-50 relative  p-8'>
-      <div className=' grid grid-cols-2 gap-4 justify-between z-50 relative'>
+    <div className='relative  p-8'>
+      <div className=' grid grid-cols-3 gap-4 justify-between relative'>
         <div>
           <label
             // id='aria-label-search'
