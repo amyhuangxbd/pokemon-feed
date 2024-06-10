@@ -1,5 +1,6 @@
 'use client'
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, memo } from "react";
+import Fuse from "fuse.js";
 import useStore from '@/app/store/useStore';
 import { fetchPokemonList, fetchPokemonDetails } from '../services/poke';
 import PokemonItem from "./PokemonItem";
@@ -18,13 +19,13 @@ const MainContent = (props: IProps) => {
         const offset = currentPage * 20;
         const list = await fetchPokemonList(offset, limit);
         const detailsPromises = list.map((pokemon: {url: string}) => fetchPokemonDetails(pokemon.url));
-        const details = await Promise.all(detailsPromises);
-        setPokemonList([...items, ...details]);
+        const detailsData = await Promise.all(detailsPromises);
+        const data = items.length === 0 ? [...details, ...detailsData] : [...items, ...detailsData]
+        setPokemonList(data);
         setHasMore(currentPage * limit < count)
         setCurrentPage(currentPage + 1)
     }
     useEffect(() => {
-        
         if (totalCount && details?.length) {
           setCount(totalCount);
           if (totalCount > limit) {
@@ -34,13 +35,34 @@ const MainContent = (props: IProps) => {
     }, [totalCount, details])
     useEffect(() => {
         const searchText = search.trim()
-        if(searchText || filters.length || sorter) {
+        if(searchText || JSON.stringify(filters) !== '{}' || sorter) {
             let tempList = items;
-            if (filters.length) {
+            for(let key in filters) {
                 tempList = tempList.filter((item) => {
-
+                    const condition = JSON.parse(filters[key])
+                    if (item.stats?.filter((m: {name: string; value: number}) => {
+                        if (m.name === key ) {
+                            if (condition.min && m.value < Number(condition.min)) {
+                                return false;
+                            }
+                            if (condition.max && m.value > Number(condition.max)) {
+                                return false;
+                            }
+                            return true;
+                        }
+                    })?.length > 0) {
+                        return true;
+                    }
+                    return false;
                 })
             }
+            if (searchText) {
+                const fuse = new Fuse(tempList, {keys: [
+                    "name"
+                ]});
+                tempList = fuse.search(searchText)
+            }
+            setPokemonList(tempList)
         }
     
       return () => {
@@ -51,13 +73,15 @@ const MainContent = (props: IProps) => {
     return (
         <>
             {
-                items.map((item, index) => (
+                items.length === 0 ? details.map((item, index) => (
+                    <PokemonItem key={index} pokemon={item} />
+                )) : items.map((item, index) => (
                     <PokemonItem key={index} pokemon={item} />
                 ))
             }
-            <InfiniteScroll loadMore={loadMore} hasMore={hasMore} />
+            <div className=" min-w-full text-center mb-12"><InfiniteScroll loadMore={loadMore} hasMore={hasMore} /></div>
         </>
     );
 };
 
-export default MainContent;
+export default memo(MainContent);
