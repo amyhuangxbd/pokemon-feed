@@ -31,24 +31,52 @@ const sortOptions = [
     label: 'Any'
   },
   {
-    value: 'name',
+    value: 'name asc',
     label: 'name A - Z',
-    type: 'asc'
+    type: 'asc',
+    field: 'name'
   },
   {
-    value: 'name',
+    value: 'name des',
     label: 'name Z - A',
-    type: 'des'
+    type: 'des',
+    field: 'name'
   },
   {
-    value: 'hp',
+    value: 'hp asc',
     label: 'hp 0 - 100',
-    type: 'asc'
+    type: 'asc',
+    field: 'hp'
   },
   {
-    value: 'hp',
+    value: 'hp des',
     label: 'hp 100 - 0',
-    type: 'des'
+    type: 'des',
+    field: 'hp'
+  },
+  {
+    value: 'attack asc',
+    label: 'attack 0 - 100',
+    type: 'asc',
+    field: 'attack'
+  },
+  {
+    value: 'attack des',
+    label: 'attack 100 - 0',
+    type: 'des',
+    field: 'attack'
+  },
+  {
+    value: 'defense asc',
+    label: 'defense 0 - 100',
+    type: 'asc',
+    field: 'defense'
+  },
+  {
+    value: 'defense des',
+    label: 'defense 100 - 0',
+    type: 'des',
+    field: 'defense'
   }
 ]
 
@@ -85,15 +113,14 @@ const SearchBar = () => {
       setSorter(null)
     }
   }
-  function onReset() {
-    setFilters({}); 
-    setSearch(''); 
-    setSorter(null)
-    setCurrentPage(1)
-  }
+  // function onReset() {
+  //   setFilters({}); 
+  //   setSearch(''); 
+  //   setSorter(null)
+  // }
   return (
     <div className='relative  p-8'>
-      <div className=' grid grid-cols-3 gap-4 justify-between relative'>
+      <div className=' grid grid-cols-2 gap-4 justify-between relative z-50'>
         <div>
           <label
             // id='aria-label-search'
@@ -142,7 +169,7 @@ const SearchBar = () => {
           />
         </div>
 
-        <button onClick={onReset}>Reset</button>
+        {/* <button onClick={onReset} className='hover:bg-yellow-600 hover:text-white w-32 h-10'>Reset</button> */}
       </div>
       <div className='grid grid-cols-6 gap-4 ml-8 '>
         <div>

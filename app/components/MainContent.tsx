@@ -1,8 +1,8 @@
 'use client'
-import React, { useState, useEffect, memo } from "react";
+import React, { useState, useEffect, memo, useMemo } from "react";
 import Fuse from "fuse.js";
 import useStore from '@/app/store/useStore';
-import { fetchPokemonList, fetchPokemonDetails } from '../services/poke';
+import { fetchPokemon, fetchPokemonDetails } from '../services/poke';
 import PokemonItem from "./PokemonItem";
 import { InfiniteScroll } from '@/app/components/infinite-scroll'
 
@@ -17,8 +17,8 @@ const MainContent = (props: IProps) => {
     const [hasMore, setHasMore] = useState(true)
     async function loadMore() {
         const offset = currentPage * 20;
-        const list = await fetchPokemonList(offset, limit);
-        const detailsPromises = list.map((pokemon: {url: string}) => fetchPokemonDetails(pokemon.url));
+        const res = await fetchPokemon(offset, limit);
+        const detailsPromises = res.results?.map((pokemon: {url: string}) => fetchPokemonDetails(pokemon.url));
         const detailsData = await Promise.all(detailsPromises);
         const data = items.length === 0 ? [...details, ...detailsData] : [...items, ...detailsData]
         setPokemonList(data);
@@ -33,10 +33,10 @@ const MainContent = (props: IProps) => {
           }
         }
     }, [totalCount, details])
-    useEffect(() => {
+    const searchFilterSortList = useMemo(() => {
         const searchText = search.trim()
+        let tempList: Record<string, any>[] = items.length === 0 ? JSON.parse(JSON.stringify(details)) : JSON.parse(JSON.stringify(items));
         if(searchText || JSON.stringify(filters) !== '{}' || sorter) {
-            let tempList = items;
             for(let key in filters) {
                 tempList = tempList.filter((item) => {
                     const condition = JSON.parse(filters[key])
@@ -60,22 +60,38 @@ const MainContent = (props: IProps) => {
                 const fuse = new Fuse(tempList, {keys: [
                     "name"
                 ]});
-                tempList = fuse.search(searchText)
+                tempList = fuse.search(searchText).map((m) => m.item)
             }
-            setPokemonList(tempList)
+            if (sorter) {
+                if (sorter.field === 'name') {
+                    tempList = tempList.sort((a, b) => {
+                        if (sorter.type === 'asc') {
+                            return a.name.localeCompare(b.name)
+                        } else {
+                            return b.name.localeCompare(a.name)
+                        }
+                    })
+                } else {
+                    tempList = tempList.sort((a, b) => {
+                        const m = a.stats.find((m: {name: string; value:number}) => m.name === sorter.field)
+                        const n = b.stats.find((m: {name: string; value:number}) => m.name === sorter.field)
+
+                        if (sorter.type === 'asc') {
+                            return m?.value - n?.value
+                        } else {
+                            return n?.value - m?.value
+                        }
+                    })
+                }
+            }
         }
-    
-      return () => {
-        
-      }
-    }, [search, filters, sorter])
-    
+        return tempList
+    }, [search, filters, sorter, items, totalCount, details])
+
     return (
         <>
             {
-                items.length === 0 ? details.map((item, index) => (
-                    <PokemonItem key={index} pokemon={item} />
-                )) : items.map((item, index) => (
+                searchFilterSortList.map((item, index) => (
                     <PokemonItem key={index} pokemon={item} />
                 ))
             }
